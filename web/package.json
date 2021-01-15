@@ -1,0 +1,57 @@
+{
+  "name": "malkachi-game",
+  "description": "",
+  "license": "Apache-2.0",
+  "author": "malkachi",
+  "engines": {
+    "node": ">=8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwn/malkachi.git"
+  },
+  "main": "app.js",
+  "private": true,
+  "cloud-repo-tools": {
+    "requiresKeyFile": true,
+    "requiresProjectId": true,
+    "test": {
+      "app": {
+        "args": [
+          "app.js"
+        ],
+        "msg": "malkachi game framework"
+      }
+    }
+  },
+  "scripts": {
+    "heroku-postbuild": "node gcp-setup.js",
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "@google-cloud/datastore": "^3.1.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "lodash": "^4.17.11",
+    "multer": "^1.4.1",
+    "nconf": "^0.10.0",
+    "path": "^0.12.7",
+    "prompt": "^1.0.0",
+    "pug": "^2.0.3",
+    "uglify-js": "^3.4.9"
+  },
+  "devDependencies": {
+    "@google-cloud/nodejs-repo-tools": "^3.0.0",
+    "ava": "^0.25.0",
+    "proxyquire": "^2.1.0",
+    "sinon": "^7.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/dwn/malkachi"
+  },
+  "homepage": "https://github.com/dwn/malkachi",
+  "directories": {
+    "lib": "lib"
+  },
+  "version": "0.1.416c58e"
+}

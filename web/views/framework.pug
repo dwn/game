@@ -1,0 +1,17 @@
+doctype html
+head
+  title malkachi app
+  meta(charset='utf-8')
+  meta(name='viewport' content='user-scalable=no')
+  link(rel='manifest' href='manifest.json')
+  link(rel='stylesheet' type='text/css' href='main.css')
+div(id='page' style="font-family:roman")
+  canvas(id='canvas' oncontextmenu='event.preventDefault()' width=640 height=480)
+  div(id='spinner')
+  div(id='output-div')
+    div(id='status')
+    span(id='output')
+script(src='xmeffects.js')
+script(src='xm.js')
+script(src='framework.js')
+script(async src='bin/'+appFileBasename+'.js')

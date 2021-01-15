@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Build and run the app
+# Use "run debug" for debug mode
+
+#Create
+make version
+# Set APP_DEBUG in api/Version.h if "run debug" was called
+if [[ "$1" == "debug" ]]; then
+  echo \#define APP_DEBUG >> api/Version.h
+fi
+# Get version string from api/Version.h
+ver=$(grep "APP_VERSION" api/Version.h)
+tmp=($ver)
+ver=${tmp[2]}
+echo $ver
+# Set version number in web/Package.json
+node > tmp.json <<EOF
+//Read data
+var data = require('./web/package.json');
+//Manipulate data
+delete data.version
+data.version = $ver;
+//Output data
+console.log(JSON.stringify(data,null,2));
+EOF
+mv tmp.json web/package.json
+# Make
+make $1
+# Start web server
+echo Running $1
+cd web
+npm start
