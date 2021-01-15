@@ -1,8 +1,8 @@
 'use strict';
 const config = require('./config');
-// const Storage = require('@google-cloud/storage');
+const PORT = config.get('PORT');
 // const CLOUD_BUCKET = config.get('CLOUD_BUCKET');
-// const storage = Storage();
+// const storage = require('@google-cloud/storage')();
 // const bucket = storage.bucket(CLOUD_BUCKET);
 const path = require('path');
 const express = require('express');
@@ -76,7 +76,7 @@ app.use((err, req, res) => {
 
 if (module === require.main) {
   //Start server
-  const server = app.listen(config.get('PORT'), () => {
+  const server = app.listen(process.env.PORT || PORT, () => {
     const port = server.address().port;
     console.log(`App listening on port ${port}`);
   });
