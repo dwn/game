@@ -1,6 +1,6 @@
 # Malkachi Games
 
-## To build and run...
+## To build and run
 
 ### Production: `./run`
 
