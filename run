@@ -28,5 +28,4 @@ mv tmp.json web/package.json
 make $1
 # Start web server
 echo Running $1
-cd web
 npm start
