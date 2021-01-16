@@ -65,4 +65,4 @@ $(ODIR)/%.html: $(IDIR2)/%.cpp
 ###########################
 
 clean:
-	@rm -f $(ODIR)/*.o $(ODIR)/*.html || true && echo "Deleting generated .o and .html files\nDone"
+	@rm -f $(ODIR)/*.o $(ODIR)/*.html || true && echo "Deleting generated .o and .html files"
