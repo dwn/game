@@ -113,7 +113,7 @@ void rrInit() {
   appSetMouseCursorOff();
   rrReset();
   njInit(); //Nanojpeg
-#ifdef APP_SKIPINTRO
+#ifdef RR_SKIPINTRO
   for(unsigned int x=0; x<1024; x++) { //Cloudy sky
     for(unsigned int y=0; y<(AG_NUMPIXELS>>10); y++) {
       int a=noise1->getTurbulence2D(x<<2,y<<4,0xff,0xff,5)<<5;
