@@ -1035,7 +1035,7 @@ void Skel3D::set(char stance) {
       SKEL3D_ANG(   0,   0,   0); //107
       SKEL3D_ANG(   0,   0,   0); //108
       SKEL3D_ANG(   0, 768,   0); //109
-    break; case 'c':
+    break; case 'c': //Crouch
       SKEL3D_ANG(   0,   0,   0); //0
       SKEL3D_ANG( 256, 892,   0); //1
       SKEL3D_ANG( 512,   0,   0); //2

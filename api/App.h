@@ -11,7 +11,8 @@
 #define appUISetPauseAudioOn() printf("[[setPauseAudioOn]]\n") //Called by appSetPauseAudioOn()
 #define appUISetPauseAudioOff() printf("[[setPauseAudioOff]]\n") //Called by appSetPauseAudioOff()
 #define appUISetAudio(file) printf("[[setAudio,%s]]\n",file)
-#define appUISetAccountPageOpen() printf("[[setAccountPageOpen]]\n")
+#define appUISetFormInput(str) printf("[[setFormInput]]%s\n",str)
+#define appUISetSay(str) printf("[[setSay]]%s\n",str)
 
 //API
 static inline bool appTextBoundary(int i) { return false; }

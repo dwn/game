@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
+############################################
+# Dan Nielsen
 # Build and run the app
 # Use "run debug" for debug mode
-
-#Create
+############################################
+# Create api/Version.h
+# Set APP_DEBUG if "run debug" was called
 make version
-# Set APP_DEBUG in api/Version.h if "run debug" was called
 if [[ "$1" == "debug" ]]; then
   echo \#define APP_DEBUG >> api/Version.h
 fi
@@ -24,6 +26,12 @@ data.version = $ver;
 console.log(JSON.stringify(data,null,2));
 EOF
 mv tmp.json web/package.json
+# Create web/public/version.js
+# Set DEBUG if "run debug" was called
+echo "const VERSION=$ver;" > web/public/version.js
+if [[ "$1" == "debug" ]]; then
+  echo "const DEBUG=1;" >> web/public/version.js
+fi
 # Make
 make $1
 # Start web server

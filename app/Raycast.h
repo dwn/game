@@ -11,7 +11,11 @@
 // #include <stdio.h>
 // #include <string.h>
 
-//#define RR_TEST //Use to inspect graphic quality
+#define RR_SKIPINTRO
+// #define RR_DEBUG //Use to inspect graphic quality
+#ifdef APP_DEBUG
+  #define RR_SKIPINTRO
+#endif
 
 void rrInit();
 void rrClose();

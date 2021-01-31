@@ -4,5 +4,6 @@
   "scripts": {
     "postinstall": "npm install --prefix web",
     "start": "npm start --prefix web"
-  }
+  },
+  "dependencies": {}
 }

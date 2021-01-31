@@ -6,7 +6,7 @@
 #include "Define.h"
 
 #ifdef APP_DEBUG
-  #define debug(x) printf(x "\n")
+  #define debug(x) printf("[[debug]]" x "\n")
 #else
   #define debug(x)
 #endif

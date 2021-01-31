@@ -1,28 +1,52 @@
+/*//////////////////////////////////////////
+// Dan Nielsen
+//////////////////////////////////////////*/
 @font-face { font-family:latin; src:url(art/fnt/latin.ttf); }
 @font-face { font-family:cyrillic; src:url(art/fnt/cyrillic.ttf); }
+ol, ul, body {
+  margin:0;
+  padding:0;
+}
 body {
   color:ivory;  
   background-color:black;
   text-align:center;
   cursor:crosshair;
 }
+ul {
+  list-style-type:none;
+  text-align:left;
+}
 a {
   text-decoration:none;
   outline:none;
 }
-#rgt-icn {
+span {
+  color:gray;
+}
+#messages-form {
   position:absolute;
-  right:10px;
+  left:0px;
   top:0px;
-  font-size:50px;
+  display:none; /* Initially hidden */
+}
+#messages {
+  position:absolute;
+  left:0px;
+  top:30px;  
+  font-size:3em;
+  background:transparent;
+  text-shadow:0 0 3px black;
+  white-space:pre-wrap;
+  text-align:left;
 }
 #output-div {
   position:absolute;
   left:calc(31% - 20px);
   top:43%;
   width:38%;
-  min-height:300px;
-  line-height:300px;
+  /*min-height:300px;*/
+  /*line-height:300px;*/
   background:rgba(109,191,232,.5);
   background:-moz-linear-gradient(top,rgba(109,191,232,1) 0%,rgba(40,161,222,.5) 50%,rgba(40,161,222,.5) 50%,rgba(31,140,194,.49) 51%,rgba(31,140,194,.49) 51%,rgba(51,160,214,0) 100%);
   background:-webkit-linear-gradient(top,rgba(109,191,232,1) 0%,rgba(40,161,222,.5) 50%,rgba(40,161,222,.5) 50%,rgba(31,140,194,.49) 51%,rgba(31,140,194,.49) 51%,rgba(51,160,214,0) 100%);

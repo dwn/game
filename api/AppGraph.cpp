@@ -1358,10 +1358,10 @@ int agCloud(Noise* noise,int x,int y,int offset) {
 //Input: (x<<10,y<<10)
 //Output: signed 23-int
 int agSea(bool noDetail,Noise* noise,int x,int y,unsigned int counter) {
-  return (noDetail? 0 : (mmSin(counter<<3)<<5)+
-                        (mmSin((x>>6)-(counter<<6))>>7)*(mmSin(y>>7)>>8)+
-                        (mmSin((x>>8)-(counter<<5))>>6)*(mmSin(y>>10)>>6))-
-          mmAbs(noise->get2D((x>>8)-(counter<<4),y>>9,0xff,0xff)<<9);
+  return (noDetail? 0 : (mmSin((x>>6)+(counter<<6))>>7)*(mmSin(y>>7)>>8)+
+                        (mmSin((x>>8)+(counter<<5))>>6)*(mmSin(y>>10)>>6)-
+                        (mmSin(counter<<3)<<5))-
+          mmAbs(noise->get2D((x>>8)+(counter<<4),y>>9,0xff,0xff)<<9);
 
 }
 

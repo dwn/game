@@ -26,6 +26,7 @@ int xOffset,yOffset,zOffset;
 unsigned short *buff,*offBuff,*zInvBuff;
 Noise *noise0,*noise1;
 bool mouseDown;
+unsigned char key,keyOld;
 //  int posSphere[3],posLight[3];
 int ind,tmp,tmp2,tmp3,tmp4,tmp5,j,yPerspOld,h00,sinTta,cosTta;
 Skel3D *skel3D;
@@ -98,20 +99,12 @@ void rrImageFetch(const char* url) {
 }
 
 void rrInit() {
-  //Game variable init
-  underWater=false;
-  wetGlassCountdown=0;
   //Init
-  readyForNextKey=true;
-  readyToFetch=true;
-  shaderIndex=0;
-  shaderIndexOld=0;
   buff=appGetFrameBuffer();
   offBuff=appGetOffFrameBuffer();
   zInvBuff=appGetZInvBuffer();
   noise0=new Noise();
   noise1=new Noise();
-  mouseDown=false;
   skel3D=new Skel3D(buff);
   splat=new Splat(buff,zInvBuff);
   agTextFont(AG_LATINFONT);
@@ -120,7 +113,7 @@ void rrInit() {
   appSetMouseCursorOff();
   rrReset();
   njInit(); //Nanojpeg
-#ifdef APP_DEBUG //Skip intro if debug
+#ifdef APP_SKIPINTRO
   for(unsigned int x=0; x<1024; x++) { //Cloudy sky
     for(unsigned int y=0; y<(AG_NUMPIXELS>>10); y++) {
       int a=noise1->getTurbulence2D(x<<2,y<<4,0xff,0xff,5)<<5;
@@ -147,23 +140,36 @@ void rrReset() {
   appUISetHideOutput();
   appSetCounterClear();
   commonRandomCounterSeed(0);
+  readyForNextKey=true;
+  readyToFetch=true;
+  shaderIndex=0;
+  shaderIndexOld=0;
+  mouseDown=false;
   tta=velRgt=velFwd=yOffset=zOffset=0,
   xOffset=-250000000;
+  underWater=false;
+  wetGlassCountdown=0;
   rrClearArtifact();
 }
 
 void rrPaused() {
   appSetPauseAudioOn();
-  if (!appGetKey()) readyForNextKey=true;
-  if (appGetMouseDown()||(appGetKey()&&readyForNextKey)) {
-    if (appGetKey()==27) {
+  keyOld=key;
+  key=appGetKey();
+  if (!key || key!=keyOld) readyForNextKey=true;
+  if (appGetMouseDown()||(key&&readyForNextKey)) {
+    if (appGetMouseDown()||key==13||key==27) {
       readyForNextKey=false;
-      appUISetAccountPageOpen();
-    } else {
       appSetPauseAudioOff();
+      appUISetHideOutput();
       rrUpdate=rrMainLoop;
       rrClearArtifact();
       rrLoopUpdate();
+    } else {
+      readyForNextKey=false;
+      char s[3];
+      s[0]=key; s[1]='\0';
+      appUISetFormInput(s);
     }
   }
 }
@@ -272,7 +278,7 @@ void rrTitleLoop() {
         commonSetPixel(offBuff+(y<<10)+x,a>255? 255 : a,160,220);
       }
     }
-    printf("Control:\n\nMouse - turn\nW A S D -  move\nSpace - jump\nQ - interact & take\nZ - dive & surface (where deep enough)\nEscape - settings\n");
+    printf("Control<br><br>Mouse - turn<br>W A S D - move<br>Space - jump<br>Q - interact & take<br>Z - dive & surface (where deep enough)<br>Escape - messaging\n");
     rrSegue(rrMainLoop);
   }
   rrLoopUpdate();
@@ -285,8 +291,11 @@ void rrMainLoop() {
   tta-=(appGetMouseCursorX()-AG_HALFWIDTH)>>6;
   tta=(tta+0x400)&0x3ff;
   //Keyboard
-  if (!readyForNextKey) readyForNextKey=!appGetKey();
-  if (appGetKey()==27) {
+  if (!readyForNextKey) readyForNextKey=!appGetKey(); //If key released, ready for next
+  if (appGetKey()==27&&readyForNextKey) {
+    key=appGetKey();
+    readyForNextKey=false;
+    printf("Control<br><br>Mouse - turn<br>W A S D - move<br>Space - jump<br>Q - interact & take<br>Z - dive & surface (where deep enough)<br>Escape - messaging\n");
     rrUpdate=rrPaused;
     rrLoopUpdate();
   }
@@ -420,21 +429,26 @@ void rrUpdate_AboveWater() {
             tmp=(detailLevel<=4?
                   (noise0->get2D((x>>8)-(counter<<3),y>>8,0xff,0xff)>>7)+(dist>>14) :
                   210-(dist>>13));
-            tmp=(tmp<0? 0 : tmp); //Keeps distant land lit
-            colorCurr[0]=tmp+135; colorCurr[1]=tmp+120; colorCurr[2]=tmp+95;
+            tmp=(tmp<0? 0 : tmp); //Keep distant land lit
+#ifdef RR_DEBUG
+            tmp+=(detailLevel&1)*15;
+#endif
+            colorCurr[0]=tmp+160; colorCurr[1]=tmp+160; colorCurr[2]=tmp+128;
           } else { //Water color
             tmp=((h-hOld)>>lengthInvPwr)>>9;
             tmp2=(dist>>12)-((h+h00-0xf0000)>>16)-395;
             tmp2=(tmp2>58? 58 : tmp2);
             tmp=mmClamp(tmp,-8,8)+tmp2;
-            //tmp2+=(detailLevel&1)*50; //Uncomment for testing only
-            colorCurr[0]=tmp2+98; colorCurr[1]=tmp+144; colorCurr[2]=tmp+189;
+#ifdef RR_DEBUG
+            tmp2+=(detailLevel&1)*50;
+#endif
+            colorCurr[0]=tmp2+96; colorCurr[1]=tmp+144; colorCurr[2]=tmp+189;
             tmp2=(h-tmp3)>>16;
-            tmp=128-tmp2;
-            if (tmp2<128) { //If shore, blend water and land
-              colorCurr[0]=(135*tmp+colorCurr[0]*tmp2)>>7;
-              colorCurr[1]=(120*tmp+colorCurr[1]*tmp2)>>7;
-              colorCurr[2]=(95*tmp+colorCurr[2]*tmp2)>>7;
+            if (tmp2<128) { //If shore, blend water and land (land + water * height)
+              tmp=128-tmp2;
+              colorCurr[0]=tmp+(tmp>>2)+((colorCurr[0]*tmp2)>>7); //Equals (160*tmp+...)>>7
+              colorCurr[1]=tmp+(tmp>>2)+((colorCurr[1]*tmp2)>>7); //Equals (160*tmp+...)>>7
+              colorCurr[2]=tmp+((colorCurr[2]*tmp2)>>7); //Equals (128*tmp+...)>>7
             }
           }
           //Coordinate boundary lines
@@ -515,21 +529,23 @@ void rrBackground_AboveWater() {
     *(zInvBuff+ind)=0;
     commonSetPixel(buff+ind,tmp+140,tmp+192,253);
   }
-  //Beach
+  //First mountain range height
   tmp=mmAbs(noise1->get2D(tmp3<<1,128,0xff,0xff)>>7)+
       mmAbs(noise1->get2D(tmp3<<2,128,0xff,0xff)>>8)+
       mmAbs(noise1->get2D(tmp3<<3,128,0xff,0xff)>>9)+
       (mmSin((tmp3>>2)-64)>>9)+192;
+  //Beach
   bound=241-(h00>>21)+(commonPermute256[(tmp3>>4)&0xff]&1);
   if (bound>tmp) bound=tmp;
   for(yPerspOld++;yPerspOld<bound;yPerspOld++) {
     ind+=AG_WIDTH; zInvBuff[ind]=0; agPoint(buff+ind,145,150,190);
   }
-  //First mountain range
-  bound=tmp-32-(h00>>21);
+  //First mountain range drawing
+  const int lowerDueToPerspective=xOffset/187904819;
+  bound=tmp-32-(h00>>21)-lowerDueToPerspective;
   for(;yPerspOld<bound;yPerspOld++) {
     ind+=AG_WIDTH;
-    tmp=(h00>>21)+yPerspOld;
+    tmp=(h00>>21)+yPerspOld+lowerDueToPerspective;
     tmp2=638+(commonPermute256[((((tmp3+(tmp&0x1))>>1)&0xff)^
                                 commonPermute256[tmp&0xff])]>>3)-(tmp<<1);
     tmp4=((((commonPermute256[(((tmp3>>1)^(tmp2>>4))&0xff)^
@@ -563,9 +579,7 @@ void rrBackground_AboveWater() {
               ((255-tmp5)*(130-(tmp>>4)))>>8,
               ((((tmp5*tmp2*tmp4)>>8)+(255-tmp5)*(160-(tmp>>4))))>>8,
               ((255-tmp5)*255)>>8);
-    }
-    else {
-      //Waterfall fills in landscape seam
+    } else { //Waterfall fills in landscape seam
       ind+=AG_WIDTH;
       tmp2=260-(tmp>>1)+
            (commonPermute256[((tmp3&0xff)^
@@ -585,10 +599,13 @@ void rrBackground_AboveWater() {
   //Flat sky
   bound=AG_HEIGHT; //352-(h00>>21);
   const int tmp2=(bound-181)<<10,
-            tmp3=(j+(-tta<<1))&0x3ff;
+            tmp3=(j-(tta<<1))&0x3ff;
   for(tmp=(yPerspOld-181)<<10;tmp<=tmp2;tmp+=1024) {
     *(zInvBuff+(ind+=AG_WIDTH))=0;
     buff[ind]=offBuff[tmp3+tmp];
+#ifdef RR_DEBUG
+    buff[ind]+=((tmp3>>7)&1)*50;
+#endif
   }
 /*//Cloud base
   bound=200+480-(h00>>21);
@@ -617,15 +634,28 @@ void rrBackground_AboveWater() {
 
 void rrScene_AboveWater() { //Everything else in the scene
   //Birds
-  if (tta>460&&tta<840) { //In view
-    tmp2=mmSin(counter&0x1ff)>>11;
+  if (tta>200&&tta<840) { //Only viewable within this range
+    tmp2=mmSin(counter&0x1ff)>>10;
     for(int i=0;i<40;i+=4) {
+      //First flock
       tmp=((tta<<1)+(tta>>1)+1660-i-(counter&0x1ff))%2560;
-      if (tmp>=0&&tmp<AG_WIDTH) {
-        ind=((287+tmp2+(commonPermute256[i]>>4)+
-              (mmSin((i<<6)+(counter<<3))>>14)+commonRandomBool()-
-              (h00>>21))*AG_WIDTH+tmp);
-        if (!zInvBuff[ind]) commonSetPixel(buff+ind,80,80,96);
+      //Store x-value of second flock in tmp4
+      tmp4=(tmp+2410+((i+(counter&0x1ff))<<1))%2560; //Compensate for leftward movement of other flock and add rightward movement
+      //Draw first flock
+      if ((tmp>=0&&tmp<AG_WIDTH) || (tmp4>=0&&tmp4<AG_WIDTH)) {
+        //To draw either flock, y-value tmp3 must be computed
+        tmp3=(256+tmp2+(commonPermute256[i]>>4)+
+               (mmSin((i<<6)+(counter<<3))>>14)+commonRandomBool()-
+               (h00>>21))*AG_WIDTH;
+        if (tmp>=0&&tmp<AG_WIDTH) {
+          ind=tmp3+tmp;
+          if (!zInvBuff[ind]) commonSetPixel(buff+ind,96,96,96);
+        }
+      }
+      //Draw second flock
+      if (tmp4>=0&&tmp4<AG_WIDTH) {
+        ind=tmp3+tmp4;
+        if (!zInvBuff[ind]) commonSetPixel(buff+ind,96,96,96);
       }
     }
   }
@@ -640,7 +670,10 @@ void rrScene_AboveWater() { //Everything else in the scene
 //                    rrSphereSurface,noise1,counter);
   //Actor
 #ifdef APP_DEBUG
-  appSetPrintLocation(30); appSetPrintInt(rrGetX()); appSetPrintInt(rrGetY());
+  appSetPrintLocation(80); appSetPrintString("x = "); appSetPrintInt(rrGetX());
+  appSetPrintLocation(2*80); appSetPrintString("y = "); appSetPrintInt(rrGetY());
+  appSetPrintLocation(3*80); appSetPrintString("h = "); appSetPrintInt(rrGetHeight());
+  appSetPrintLocation(4*80); appSetPrintString("tta = "); appSetPrintInt(rrGetAngle());
 #endif
   posSkel3D[0]=0; posSkel3D[1]=0; posSkel3D[2]=-counter<<9;
   skel3D->setPosition((rrGetY()>>10),

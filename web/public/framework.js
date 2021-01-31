@@ -1,13 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
-//Dan Nielsen
+// Dan Nielsen
 ////////////////////////////////////////////////////////////////////////////////
-var statusEl = document.getElementById('status');
-var spinnerEl = document.getElementById('spinner');
-var canvasEl = document.getElementById('canvas');
-var outputEl = document.getElementById('output');
-var outputDivEl = document.getElementById('output-div');
-var clickEv = 'click'; //Mouse until proven innocent
-
+if (typeof DEBUG!=='undefined' && DEBUG==1) {function debug(s){console.log(s);}} else {function debug(s){}}
+////////////////////////////////////////////////////////////////////////////////
+const statusEl = document.getElementById('status');
+const spinnerEl = document.getElementById('spinner');
+const canvasEl = document.getElementById('canvas');
+const uiDivEl = document.getElementById('ui-div');
+const outputEl = document.getElementById('output');
+const messagesFormEl = document.getElementById('messages-form');
+const messagesInputEl = document.getElementById('messages-input');
+const messagesEl = document.getElementById('messages');
+var clickEv = 'click'; //Assume mouse until proven touchable
+var outputShowing = false;
+////////////////////////////////////////////////////////////////////////////////
+// Rotation as needed to always show in landscape
+////////////////////////////////////////////////////////////////////////////////
 function transformElement(el, xform) {
   el.style.webkitTransform = xform;
   el.style.mozTransform = xform;
@@ -15,7 +23,6 @@ function transformElement(el, xform) {
   el.style.oTransform = xform;
   el.style.transform = xform;
 }
-
 function setCanvasSizeRotateOn(w, h) {
   wOld = canvasEl.style.width;
   hOld = canvasEl.style.height;
@@ -25,39 +32,81 @@ function setCanvasSizeRotateOn(w, h) {
   yOffset = (w - parseInt(wOld)) >> 1;
   transformElement(canvasEl, 'rotate(90deg) translate(' + xOffset + 'px,' + yOffset + 'px)');
 }
-
 function setRotateOff() {
   transformElement(canvasEl, 'none');
 }
-
+////////////////////////////////////////////////////////////////////////////////
+// Speech synth
+////////////////////////////////////////////////////////////////////////////////
+function say(text, pitch=2.5) {
+  var utterance = new SpeechSynthesisUtterance(text);
+  utterance.pitch = pitch;
+  utterance.lang = "en-US";
+  utterance.volume = 0.15;
+  window.speechSynthesis.speak(utterance);
+}
+////////////////////////////////////////////////////////////////////////////////
+// Show and hide elements for writing and displaying messages
+////////////////////////////////////////////////////////////////////////////////
 function showOutput() {
-  outputDivEl.removeAttribute('style');
-  outputEl.removeAttribute('style');
-  outputDivEl.addEventListener(clickEv, hideOutput, 'once');
+  if (outputShowing) {
+    debug('Output already showing');
+  }
+  else {
+    debug('showOutput');
+    outputShowing=true;
+    //Output
+    canvasEl.addEventListener(clickEv, hideOutput, 'once');
+    //Messages
+    uiDivEl.style.display='block';
+    messagesEl.style.display='block'; //Always show messages
+    messagesEl.style.top='30px'; //Move below input field
+    //Messages input
+    messagesFormEl.style.display='block'; //Show input field and button
+    messagesInputEl.addEventListener('keydown', inputSpecial); //Required for special keys in input field
+    messagesInputEl.addEventListener('keyup', inputSpecial); //Required for special keys in input field
+    messagesInputEl.addEventListener('mousedown', inputSpecial); //Required for special keys in input field
+    messagesInputEl.addEventListener('mouseup', inputSpecial); //Required for special keys in input field
+    messagesInputEl.focus();
+  }
 }
-
 function hideOutput() {
+  debug('hideOutput');
+  outputShowing=false;
+  //Output
+  outputEl.innerHTML='';
+  canvasEl.removeEventListener(clickEv, hideOutput, 'once');
+  //Messages
+  uiDivEl.style.display='none';
+  messages.style.top='0';
+  //Messages input
+  messagesInputEl.value='';
+  messagesInputEl.removeEventListener('keydown', inputSpecial);
+  messagesInputEl.removeEventListener('keyup', inputSpecial);
+  messagesInputEl.removeEventListener('mousedown', inputSpecial);
+  messagesInputEl.removeEventListener('mouseup', inputSpecial);
+  //Speech
   window.speechSynthesis.cancel();
-  outputDivEl.setAttribute('style', 'display:none');
-  outputEl.innerText='';
 }
-
-function showUI() {
-  XMPlayer.play();
+////////////////////////////////////////////////////////////////////////////////
+// Mouse or touchpad mode
+////////////////////////////////////////////////////////////////////////////////
+function setMouseOrTouchMode() {
+  debug('Input device: '+clickEv);
+  XMPlayer.play(); //Music can only begin on user input
   //window.dispatchEvent(new Event('resize')); //Trigger resize event
-  // document.getElementById('rgt-icn').removeAttribute('style');
-  canvasEl.removeEventListener('click', showUI);
-  canvasEl.removeEventListener('touchstart', setTouch);
+  canvasEl.removeEventListener('click', setMouseOrTouchMode);
+  canvasEl.removeEventListener('touchstart', setTouchMode);
 }
-
-function setTouch() {
+function setTouchMode() {
   clickEv = 'touchstart';
-  showUI();
+  setMouseOrTouchMode();
 }
-
-canvasEl.addEventListener('click', showUI);
-canvasEl.addEventListener('touchstart', setTouch);
-
+canvasEl.addEventListener('click', setMouseOrTouchMode);
+canvasEl.addEventListener('touchstart', setTouchMode);
+////////////////////////////////////////////////////////////////////////////////
+// Load music
+////////////////////////////////////////////////////////////////////////////////
 (function (window, document) {
   if (!window.XMPlayer) {
     window.XMPlayer = {};
@@ -72,20 +121,20 @@ canvasEl.addEventListener('touchstart', setTouch);
       if (arrayBuffer) {
         XMPlayer.load(arrayBuffer);
       } else {
-        console.log("unable to load .xm uri");
+        debug("unable to load .xm uri");
       }
     };
     xmReq.send(null);
   };
 })(window, document);
-
+////////////////////////////////////////////////////////////////////////////////
+// Module
+////////////////////////////////////////////////////////////////////////////////
 var Module = {
-  preRun: [],
-  postRun: [],
   print: (function() {
     return function(text) {
       if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-      if (text.substr(text.length-17, text.length) === '[[setHideOutput]]') {
+      if (text === '[[setHideOutput]]') {
         hideOutput();
       } else if (text === '[[setRotateOff]]') {
         setRotateOff();
@@ -95,11 +144,8 @@ var Module = {
       } else if (text === '[[setPauseAudioOn]]') {
         XMPlayer.pause();
       } else if (text === '[[setPauseAudioOff]]') {
-        XMPlayer.play();
-      } else if (text === '[[setAccountPageOpen]]') {
         window.speechSynthesis.cancel();
-        window.open('upload_avatar');
-        text=''; //Clear text
+        XMPlayer.play();
       } else if (text.substr(0,11) === '[[setAudio,') {
         var s = text.split(',');
         XMPlayer.stop();
@@ -112,33 +158,35 @@ var Module = {
             XMPlayer.load(arrayBuffer);
             XMPlayer.play();
           } else {
-            console.log("unable to load .xm uri");
+            debug("unable to load .xm uri");
           }
         };
         xmReq.send(null);
-      } else {  
-        // These replacements are necessary if you render to raw HTML
-        //text = text.replace(/&/g, "&amp;");
-        //text = text.replace(/</g, "&lt;");
-        //text = text.replace(/>/g, "&gt;");
-        //text = text.replace('\n', '<br>', 'g');
-        console.log(text);
-        if (outputEl) {
-          outputEl.innerText += text + "\n";
-          outputEl.scrollTop = outputEl.scrollHeight; // focus on bottom
-          var utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = "en-US";
-          utterance.volume = 0.15;
-          window.speechSynthesis.speak(utterance);
+      } else if (text.substr(0,16) === '[[setFormInput]]') {
+        inputText(text.substr(16,text.length-16));
+      } else if (text.substr(0,9) === '[[debug]]') {
+        debug(text);
+      } else {
+        if (text.substr(0,10) === '[[setSay]]') {
+          text=text.substr(10);
+          say(text.replace(/\<br\>/g,','));
         }
+        text=text.replace(/&/g, "&amp;");
+        outputEl.innerHTML+=text;
         showOutput();
+        debug(text);
       }
     };
   })(),
+////////////////////////////////////////////////////////////////////////////////
+// Standard
+////////////////////////////////////////////////////////////////////////////////  
+  preRun: [],
+  postRun: [],
   printErr: function(text) {
     if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-    if (0) { // XXX disabled for safety typeof dump == 'function') {
-      dump(text + '\n'); // fast, straight to the real console
+    if (typeof dump == 'function') {
+      dump(text+'\n'); //Directly to real console
     } else {
       console.error(text);
     }
@@ -148,24 +196,23 @@ var Module = {
   })(),
   setStatus: function(text) {
     if (text==='Running...') {
-      console.log('Running...');
-      // spinnerEl.remove();
+      debug('Running...');
+      spinnerEl.remove(); //Would be hidden anyway, but remove it
     }
-    statusEl.innerHTML = text;
+    statusEl.innerHTML=text;
   },
   totalDependencies: 0,
   monitorRunDependencies: function(left) {
     this.totalDependencies = Math.max(this.totalDependencies, left);
-    var s = left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete';
+    var s = left ? 'Preparing...' : 'Downloads complete...';
     Module.setStatus(s);
-    console.log(s);
+    debug(s);
   }
 };
 Module.setStatus('Downloading...');
 window.onerror = function(event) {
-  // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
   Module.setStatus('Exception thrown, see JavaScript console');
-  // spinnerEl.remove();
+  spinnerEl.remove(); //Would be hidden anyway, but remove it
   Module.setStatus = function(text) {
     if (text) Module.printErr('[post-exception status] ' + text);
   };
