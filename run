@@ -15,14 +15,10 @@ ver=$(grep "APP_VERSION" api/Version.h)
 tmp=($ver)
 ver=${tmp[2]}
 echo $ver
-# Set version number in web/Package.json
+# Set version number in web/package.json
 node > tmp.json <<EOF
-//Read data
 var data = require('./web/package.json');
-//Manipulate data
-delete data.version
 data.version = $ver;
-//Output data
 console.log(JSON.stringify(data,null,2));
 EOF
 mv tmp.json web/package.json

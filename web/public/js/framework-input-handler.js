@@ -5,8 +5,8 @@ if (typeof DEBUG!=='undefined' && DEBUG==1) {function debug(s){console.log(s);}}
 ////////////////////////////////////////////////////////////////////////////////
 // Special keyboard handling unfortunately needed because Emscripten eats all keyboard input
 ////////////////////////////////////////////////////////////////////////////////
-var codeMap={'Shift':false,'Control':false};
-var cur=messagesInputEl.selectionEnd;
+var codeMap={'Shift':false};
+var cur;
 var curOld=cur;
 var curSave=cur;
 var val='';
@@ -60,7 +60,6 @@ function inputSpecial(ev) {
   }
   val=messagesInputEl.value;
   codeMap['Shift']=ev.shiftKey;
-  codeMap['Control']=ev.ctrlKey;
   if (codeMap['Backspace'] || codeMap['Delete']) {
     valOld=val;
     var a=val.substr(0,messagesInputEl.selectionStart);

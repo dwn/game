@@ -120,6 +120,7 @@ canvasEl.addEventListener('touchstart', setTouchMode);
       var arrayBuffer = xmReq.response;
       if (arrayBuffer) {
         XMPlayer.load(arrayBuffer);
+        XMPlayer.play();
       } else {
         debug("unable to load .xm uri");
       }

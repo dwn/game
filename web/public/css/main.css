@@ -1,8 +1,8 @@
 /*//////////////////////////////////////////
 // Dan Nielsen
 //////////////////////////////////////////*/
-@font-face { font-family:latin; src:url(art/fnt/latin.ttf); }
-@font-face { font-family:cyrillic; src:url(art/fnt/cyrillic.ttf); }
+@font-face { font-family:latin; src:url(/art/fnt/latin.ttf); }
+@font-face { font-family:cyrillic; src:url(/art/fnt/cyrillic.ttf); }
 ol, ul, body {
   margin:0;
   padding:0;
@@ -75,7 +75,7 @@ span {
   border:none;
 }
 #spinner {
-  background-image:url(art/img/spinner.gif);
+  background-image:url(/art/img/spinner.gif);
   width:100%;
   height:100%;
   position:absolute;

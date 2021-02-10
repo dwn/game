@@ -2,15 +2,20 @@
 // Dan Nielsen
 ////////////////////////////////////////////
 'use strict';
-const config = require('./config');
-const PORT = config.get('PORT');
-const CLOUD_BUCKET = config.get('CLOUD_BUCKET');
+const fs = require('fs');
 const path = require('path');
+const cfg = JSON.parse(fs.readFileSync('art/cfg.json', 'utf8'));
+const PORT = cfg['PORT'];
+const CLOUD_BUCKET = cfg['CLOUD_BUCKET'];
+const STATIC_CLOUD_BUCKET = cfg['STATIC_CLOUD_BUCKET'];
+const {Storage} = require('@google-cloud/storage');
+const storage = new Storage();
+const bucket = storage.bucket(CLOUD_BUCKET);
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-const ULID = require('ulid');
+const ulid = require('ulid');
 ////////////////////////////////////////////
 // Setup
 ////////////////////////////////////////////
@@ -19,30 +24,28 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.set('trust proxy', true);
 app.use(express.static(path.join(__dirname, 'public')));
-app.use("/art",express.static(path.join(__dirname, '../art')));
-app.use("/bin",express.static(path.join(__dirname, '../bin')));
 ////////////////////////////////////////////
 // Chat
 ////////////////////////////////////////////
-var dicFontFilename = {};
+var dicFontBasename = {};
 ////////////////////////////////////////////
 var connections = new Set();
 io.on('connection', (socket) => {
   connections.add(socket);
-  for(var user in dicFontFilename) {
-    socket.emit('chat font', user+':'+dicFontFilename[user]);
+  for(var user in dicFontBasename) {
+    socket.emit('chat font', user+':'+dicFontBasename[user]);
   }
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
-    console.log('MSG'+msg);
+    console.log('MSG.'+msg);
   });
   socket.on('chat font', (msg) => {
     io.emit('chat font', msg);
-    console.log('FONT'+msg);
+    console.log('FONT.'+msg);
   });
   socket.once('disconnect', function () {
     connections.delete(socket);
-    console.log('DESOCKET_'+socket.id);
+    console.log('DESOCKET.'+socket.id);
   });
 });
 ////////////////////////////////////////////
@@ -61,36 +64,57 @@ function romanNumeral(number){
   else for(let key in romanNumList) { a = Math.floor(number / romanNumList[key]); if(a >= 0) for(let i = 0; i < a; i++) roman += key; number = number % romanNumList[key]; }
   return roman;
 }
-app.get('/unique-username', function(req, res) {
+function uniqueUsername(name=null) {
+  var un = (name? name : arrUser[Math.floor(Math.random()*arrUser.length)]);
   var n = 1;
-  var un = (req.query.name? req.query.name : arrUser[Math.floor(Math.random()*arrUser.length)]);
-  for(var user in dicFontFilename) {
-    var un2=user.split('_')[2].split('-')[0];
-    if (un===un2) n++;
+  if (dicFontBasename) {
+    for(var user in dicFontBasename) {
+      var un2=user.split('_')[1].split('-')[0];
+      if (un===un2) n++;
+    }
   }
-  un += (n>1?  '-' + romanNumeral(n) : '');
-  res.send('_'+ ULID.ulid() +'_' + un);
+  un += (n>1? '-' + romanNumeral(n) : '');
+  return 'x' + ulid.ulid() + '_' + un; //Starts with a letter because sometimes uid gets interpretted as a number otherwise
+}
+var myUniqueUsername;
+app.get('/unique-username', function(req, res) {
+  res.send(uniqueUsername(req.query.name));
+});
+app.get('/my-unique-username', function(req, res) {
+  myUniqueUsername = (myUniqueUsername? myUniqueUsername : uniqueUsername(req.query.name));
+  res.send(myUniqueUsername);
 });
 ////////////////////////////////////////////
-function chat(username,fontFilename) {
-  io.emit('chat message', '__connected:'+username+':'+fontFilename);
-  dicFontFilename[username] = fontFilename;
+function connectChat(username,fontBasename,isMe=false) {
+  if (!username) username = myUniqueUsername = uniqueUsername();
+  if (!fontBasename) fontBasename = 'NEW';
+  io.emit('chat message', '_connected:'+username+':'+fontBasename);
+  dicFontBasename[username] = fontBasename;
 }
-////////////////////////////////////////////
-// Main
+app.get('/chat/:fontBasename', (req, res) => {
+  connectChat(req.query.username,req.params.fontBasename,true);
+  res.render('chat.pug');
+});
 ////////////////////////////////////////////
 app.get('/bucket-uri', (req, res) => {
   res.send(`https://storage.googleapis.com/${CLOUD_BUCKET}/`);
 });
+app.get('/static-bucket-uri', (req, res) => {
+  res.send(`https://storage.googleapis.com/${STATIC_CLOUD_BUCKET}/`);
+});
+////////////////////////////////////////////
+// Main
 ////////////////////////////////////////////
 app.get('/', (req, res) => {
   res.send('Use the basename of the app file in the address, such as "localhost:8080/Checkers"');
 });
 ////////////////////////////////////////////
 app.get('/:appFileBasename', (req, res) => {
-  chat(req.query.username,req.query.fontFilename);
+  connectChat(null,req.query.font,true);
   res.render('framework.pug', { appFileBasename : req.params.appFileBasename });
 });
+////////////////////////////////////////////
+// Server
 ////////////////////////////////////////////
 app.use((req, res) => { //Basic 404 handler
   res.status(404).send('Not Found');
@@ -101,10 +125,7 @@ app.use((err, req, res) => { //Basic error handler
   res.status(500).send(err.response || 'Something broke!');
 });
 ////////////////////////////////////////////
-// Standard
-////////////////////////////////////////////
 if (module === require.main) {
-  //Start server
   server.listen(process.env.PORT || PORT, () => {
     const port = server.address().port;
     console.log(`App listening on port ${port}`);
