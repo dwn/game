@@ -1,5 +1,4 @@
 {
   "CLOUD_BUCKET": "continua-bucket",
-  "STATIC_CLOUD_BUCKET": "continua-static-bucket",
   "PORT": 8080
 }

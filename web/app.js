@@ -7,7 +7,6 @@ const path = require('path');
 const cfg = JSON.parse(fs.readFileSync('art/cfg.json', 'utf8'));
 const PORT = cfg['PORT'];
 const CLOUD_BUCKET = cfg['CLOUD_BUCKET'];
-const STATIC_CLOUD_BUCKET = cfg['STATIC_CLOUD_BUCKET'];
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -96,11 +95,11 @@ app.get('/chat/:fontBasename', (req, res) => {
   res.render('chat.pug');
 });
 ////////////////////////////////////////////
-app.get('/bucket-uri', (req, res) => {
+app.get('/bucket-url', (req, res) => {
   res.send(`https://storage.googleapis.com/${CLOUD_BUCKET}/`);
 });
-app.get('/static-bucket-uri', (req, res) => {
-  res.send(`https://storage.googleapis.com/${STATIC_CLOUD_BUCKET}/`);
+app.get('/common-url', (req, res) => {
+  res.send(`https://dwn.github.io/common/`);
 });
 ////////////////////////////////////////////
 // Main
