@@ -38,10 +38,10 @@ io.on('connection', (socket) => {
     io.emit('chat message', msg);
     console.log('MSG.'+msg);
   });
-  // socket.on('chat font', (msg) => {
-  //   io.emit('chat font', msg);
-  //   console.log('FONT.'+msg);
-  // });
+  socket.on('chat font', (msg) => {
+    io.emit('chat font', msg);
+    console.log('FONT.'+msg);
+  });
   socket.once('disconnect', function () {
     connections.delete(socket);
     console.log('DESOCKET.'+socket.id);
@@ -109,7 +109,7 @@ app.get('/', (req, res) => {
 });
 ////////////////////////////////////////////
 app.get('/:appFileBasename', (req, res) => {
-  connectChat(null,req.query.font,true);
+  // connectChat(null,req.query.font,true);
   res.render('framework.pug', { appFileBasename : req.params.appFileBasename });
 });
 ////////////////////////////////////////////
