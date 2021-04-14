@@ -109,8 +109,7 @@ app.get('/', (req, res) => {
 });
 ////////////////////////////////////////////
 app.get('/:appFileBasename', (req, res) => {
-  console.log('CALLED /:appFileBasename '+req.params.appFileBasename);
-  // connectChat(null,req.query.font,true);
+  // connectChat(null,req.query.font,true); //<---------TODO: uncomment & restore functionality
   res.render('framework.pug', { appFileBasename : req.params.appFileBasename });
 });
 ////////////////////////////////////////////
