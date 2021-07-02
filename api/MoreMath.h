@@ -329,4 +329,4 @@ LL mmIntPow(LL base,LL exponent);
 API
 LL mmStirling2(LL n, LL m);
 API
-LL mmPolybernoulli(LL n,LL m);
+LL mmPolyBernoulli(LL n,LL m);

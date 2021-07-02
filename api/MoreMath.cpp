@@ -679,13 +679,14 @@ LL mmStirling2(LL n, LL m) {
   return m&1? -res : res;
 }
 
-//Actually uses negative m to yield positive integers
-LL mmPolybernoulli(LL n,LL m) {
+//Warning: uses different indices than standard poly-Bernoulli function
+//mmPolyBernoulli(n,m) = B(1-k,1+n)
+LL mmPolyBernoulli(LL n,LL m) {
   LL res=0;
-  for(LL i=0;i<=(const LL)min(n,m);i++) {
-    LL tmp=mmFact(i);
+  for(LL i=1;i<=(const LL)min(n,m);i++) {
+    LL tmp=mmFact(i-1);
     tmp*=tmp;
-    res+=tmp*mmStirling2(n+1,i+1)*mmStirling2(m+1,i+1);
+    res+=tmp*mmStirling2(n,i)*mmStirling2(m,i);
   }
   return res;
 }
