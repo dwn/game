@@ -680,7 +680,7 @@ LL mmStirling2(LL n, LL m) {
 }
 
 //Warning: uses different indices than standard poly-Bernoulli function
-//mmPolyBernoulli(n,m) = B(-n-1,m-1); n,m > 0
+//mmPolyBernoulli(n,m) == B(-n-1,m-1) == B(n-1,-m-1); n,m > 0
 LL mmPolyBernoulli(LL n,LL m) {
   LL res=0;
   for(LL i=1;i<=(const LL)min(n,m);i++) {
