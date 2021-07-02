@@ -684,7 +684,7 @@ LL mmStirling2(LL n, LL m) {
 LL mmPolyBernoulli(LL n,LL m) {
   LL res=0;
   for(LL i=1;i<=(const LL)min(n,m);i++) {
-    LL tmp=mmFact(i-1);
+    const LL tmp=mmFact(i-1);
     res+=tmp*mmStirling2(n,i)*tmp*mmStirling2(m,i);
   }
   return res;
