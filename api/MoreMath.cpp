@@ -646,3 +646,46 @@ void mmNormalizeVec15(int* v) {
     v++;
   }
 }
+
+LL mmFact(LL n) {
+    if (!n) return 1;
+    LL res=n;
+    while(--n>1) res*=n;
+    return res;
+}
+
+LL mmChoose(LL n,LL m) {
+    LL numer=1,denom=1;
+    for(LL i=n;i>n-m;i--) numer*=i;
+    for(LL i=2;i<=m;i++) denom*=i;
+    return numer/denom;
+}
+
+LL mmIntPow(LL base,LL exponent) {
+    if (!exponent) return 1;
+    int res=mmIntPow(base,exponent>>1);
+    res*=res;
+    if (exponent&1) res*=base;
+    return res;
+}    
+
+LL mmStirling2(LL n, LL m) {
+    LL res=0;
+    for(LL k=0;k<=m;k++) {
+        const LL tmp=mmChoose(m,k)*mmIntPow(k,n);
+        res+=(k&1? -tmp : tmp);
+    }
+    res/=mmFact(m);
+    return m&1? -res : res;
+}
+
+//Uses the negative superscript to yield positive integers
+LL mmPolybernoulli(LL n,LL m) {
+    LL res=0;
+    for(LL i=0;i<=(const LL)min(n,m);i++) {
+        LL tmp=mmFact(i);
+        tmp*=tmp;
+        res+=tmp*mmStirling2(n+1,i+1)*mmStirling2(m+1,i+1);
+    }
+    return res;
+}

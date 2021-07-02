@@ -24,6 +24,8 @@
 #define MM_SQRRTTHREEOVERSQRRTTWO 0x13989 //16.16-fixed sqrt(3/2)
 #define MM_ONEOVERSQRRTSIX 0x6883 //16.16-fixed sqrt(1/6)
 
+typedef long long LL;
+
 //Input: unsigned .8-fixed
 //Output: unsigned .8-fixed
 static const unsigned char mmSCurveTable[]={
@@ -318,3 +320,13 @@ API
 void mmTrunShiftCorrelateVec15(int* vr,int* va,int* vb);
 API
 void mmNormalizeVec15(int* v);
+API
+LL mmFact(LL n);
+API
+LL mmChoose(LL n,LL m);
+API
+LL mmIntPow(LL base,LL exponent);
+API
+LL mmStirling2(LL n, LL m);
+API
+LL mmPolybernoulli(LL n,LL m);
