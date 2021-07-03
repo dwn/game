@@ -683,7 +683,7 @@ LL mmStirling2(LL n, LL m) {
 //mmPolyBernoulli(n,m) == B(-n-1,m-1) == B(n-1,-m-1); n,m > 0
 LL mmPolyBernoulli(LL n,LL m) {
   LL res=0;
-  for(LL i=1;i<=(const LL)min(n,m);i++) {
+  for(LL i=1;i<=(const LL)mmMin(n,m);i++) {
     const LL tmp=mmFact(i-1);
     res+=tmp*mmStirling2(n,i)*tmp*mmStirling2(m,i);
   }
