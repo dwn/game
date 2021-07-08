@@ -679,13 +679,11 @@ LL mmStirling2(LL n, LL m) {
   return m&1? -res : res;
 }
 
-//Warning: uses different indices than standard poly-Bernoulli function
-//mmPolyBernoulli(n,m) == B(-n-1,m-1) == B(n-1,-m-1); n,m > 0
 LL mmPolyBernoulli(LL n,LL m) {
   LL res=0;
-  for(LL i=1;i<=(const LL)mmMin(n,m);i++) {
-    const LL tmp=mmFact(i-1);
-    res+=tmp*mmStirling2(n,i)*tmp*mmStirling2(m,i);
+  for(LL i=0;i<=(const LL)mmMin(n,m);i++) {
+    const LL tmp=mmFact(i);
+    res+=tmp*mmStirling2(n+1,i+1)*tmp*mmStirling2(m+1,i+1);
   }
   return res;
 }
