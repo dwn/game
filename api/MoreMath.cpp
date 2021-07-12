@@ -699,7 +699,7 @@ DBL mmErlangPDF(DBL x,DBL k) {
 }
 
 // int main() {
-//    LL M=5,N=7;
+//    LL M=5,N=5;
 //    DBL S=0;
 //    DBL x=.1;
 //    //for(LL n=1;n<=N;n++) {
