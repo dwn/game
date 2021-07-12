@@ -654,6 +654,10 @@ LL mmFact(LL n) {
   return res;
 }
 
+LL mmGamma(LL n) {
+  return mmFact(n-1);
+}
+
 LL mmChoose(LL n,LL m) {
   LL numer=1,denom=1;
   for(LL i=n;i>n-m;i--) numer*=i;
@@ -680,10 +684,31 @@ LL mmStirling2(LL n, LL m) {
 }
 
 LL mmPolyBernoulli(LL n,LL m) {
+  m++; n++;
   LL res=0;
-  for(LL i=0;i<=(const LL)mmMin(n,m);i++) {
-    const LL tmp=mmFact(i);
-    res+=tmp*mmStirling2(n+1,i+1)*tmp*mmStirling2(m+1,i+1);
+  for(LL i=1;i<=(const LL)mmMin(n,m);i++) {
+    const LL tmp=mmGamma(i-1);
+    res+=tmp*mmStirling2(n,i)*tmp*mmStirling2(m,i);
   }
   return res;
 }
+
+//Lambda rate is assumed to be once per unit time
+DBL mmErlangPDF(DBL x,DBL k) {
+    return (pow(x,k-1)*exp(-x))/mmGamma(k);
+}
+
+// int main() {
+//    LL M=5,N=7;
+//    DBL S=0;
+//    DBL x=.1;
+//    //for(LL n=1;n<=N;n++) {
+//        for(LL m=1;m<=M;m++) {
+//            S+=mmErlangPDF(x,m);
+//            //cout<<mmPolyBernoulli(i,j)<<" ";
+//        }
+//        cout<<S<<" ";
+//        cout<<"\n";
+//    //}
+//    return 0;
+// }

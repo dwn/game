@@ -25,6 +25,7 @@
 #define MM_ONEOVERSQRRTSIX 0x6883 //16.16-fixed sqrt(1/6)
 
 typedef long long LL;
+typedef long double DBL;
 
 //Input: unsigned .8-fixed
 //Output: unsigned .8-fixed
