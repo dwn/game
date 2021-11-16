@@ -102,7 +102,7 @@ app.get('/chat', (req, res) => {
 });
 app.get('/chat/:fontBasename', (req, res) => {
   var username=req.query.username;
-  if (!username.includes('_')) {
+  if (!(username&&username.includes('_'))) {
     username=uniqueUsername(username);
     res.redirect('/chat/'+req.params.fontBasename+'?username='+username);
   }
@@ -124,7 +124,14 @@ app.get('/', (req, res) => {
 });
 ////////////////////////////////////////////
 app.get('/:appFileBasename', (req, res) => {
-  // connectChat(null,req.query.font,true); //<---------TODO: uncomment & restore functionality
+  var fontBasename = req.query.font;
+  var username=req.query.username;
+  if (!(fontBasename&&username&&username.includes('_'))) {
+    if (!(username&&username.includes('_'))) username=uniqueUsername(username);
+    if (!fontBasename) fontBasename = 'teonaht'; //Default font
+    res.redirect('/'+req.params.appFileBasename+'?font='+fontBasename+'&username='+username);
+  }
+  connectChat(username,fontBasename,true);
   res.render('framework.pug', { appFileBasename : req.params.appFileBasename });
 });
 ////////////////////////////////////////////

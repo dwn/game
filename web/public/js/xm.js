@@ -913,7 +913,7 @@ function init() {
     var audioContext = window.AudioContext || window.webkitAudioContext;
     player.audioctx = new audioContext();
     gainNode = player.audioctx.createGain();
-    gainNode.gain.value = 0.075;  // master volume
+    gainNode.gain.value = 0.025;  // master volume
   }
   if (player.audioctx.createScriptProcessor === undefined) {
     jsNode = player.audioctx.createJavaScriptNode(16384, 0, 2);
