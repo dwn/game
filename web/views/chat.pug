@@ -6,12 +6,20 @@ html(lang='en')
   head
     title chat
     meta(charset='utf-8')
-    link(rel='stylesheet', type='text/css', href='https://dwn.github.io/common/css/chat.css')
+    link(rel='stylesheet', type='text/css', href='../css/chat.css')
     script(src='/socket.io/socket.io.js')
+    script(src='https://dwn.github.io/common/js/mespeak.js')
     script(src='https://dwn.github.io/common/js/jquery-3.3.1.min.js')
-    script(src='https://dwn.github.io/common/js/chat.js')
-  body(style='background:#ffc')
+  body
+    .container
+      each lang in arrLang
+        a(href=`/chat/${lang}?username=${username}`)
+          div.tag-container
+            div.tag
+              p #{lang}
     ul(id='messages')
     form(action='')
-      input(id='messages-input' autocomplete='off' autofocus)
+      input#message-input(autocomplete='off' autofocus)
       button &rarrhk;
+    p#search-result
+    script(src='https://dwn.github.io/common/js/chat.js')

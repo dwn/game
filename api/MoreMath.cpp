@@ -694,9 +694,9 @@ LL mmPolyBernoulli(LL n,LL m) {
 }
 
 //Lambda rate is assumed to be once per unit time
-DBL mmErlangPDF(DBL x,DBL k) {
-    return (pow(x,k-1)*exp(-x))/mmGamma(k);
-}
+// DBL mmErlangPDF(DBL x,DBL k) {
+//     return (mmPow(x,k-1)*mmExp(-x))/mmGamma(k); //TODO: shift values for correct result
+// }
 
 // int main() {
 //    LL M=5,N=5;

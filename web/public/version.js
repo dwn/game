@@ -1,1 +1,2 @@
-const VERSION="0.1.48b6d44";
+const VERSION="0.1.5a7fd73";
+const DEBUG=1;

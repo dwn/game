@@ -15,6 +15,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const ulid = require('ulid');
+const request = require('request');
 ////////////////////////////////////////////
 // Setup
 ////////////////////////////////////////////
@@ -23,6 +24,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.set('trust proxy', true);
 app.use(express.static(path.join(__dirname, 'public')));
+////////////////////////////////////////////
+var arrLang;
+request.get('https://dwn.github.io/common/lang/list', function (error, response, body) {
+  if (!error && response.statusCode === 200) {
+    arrLang = body.split('\n').filter(function (el) { return el !== null && el !== ''; });
+  }
+});
 ////////////////////////////////////////////
 // Chat
 ////////////////////////////////////////////
@@ -86,20 +94,27 @@ app.get('/my-unique-username', function(req, res) {
 ////////////////////////////////////////////
 function connectChat(username,fontBasename,isMe=false) {
   if (!username) username = myUniqueUsername = uniqueUsername();
-  if (!fontBasename) fontBasename = 'NEW';
   io.emit('chat message', '_connected:'+username+':'+fontBasename);
   dicFontBasename[username] = fontBasename;
 }
+app.get('/chat', (req, res) => {
+  res.render('chat-login.pug');
+});
 app.get('/chat/:fontBasename', (req, res) => {
-  connectChat(req.query.username,req.params.fontBasename,true);
-  res.render('chat.pug');
+  var username=req.query.username;
+  if (!username.includes('_')) {
+    username=uniqueUsername(username);
+    res.redirect('/chat/'+req.params.fontBasename+'?username='+username);
+  }
+  connectChat(username,req.params.fontBasename,true);
+  res.render('chat.pug', { arrLang:arrLang, username:username });
 });
 ////////////////////////////////////////////
 app.get('/bucket-url', (req, res) => {
   res.send(`https://storage.googleapis.com/${CLOUD_BUCKET}/`);
 });
-app.get('/common-url', (req, res) => {
-  res.send(`https://dwn.github.io/common/`);
+app.get('/common-lang-url', (req, res) => {
+  res.send(`https://dwn.github.io/common/lang/`);
 });
 ////////////////////////////////////////////
 // Main
