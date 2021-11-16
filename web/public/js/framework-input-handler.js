@@ -13,10 +13,10 @@ var val='';
 var valOld=val;
 var valSave=val;
 function inputText(txt) {
-  var val=messagesInputEl.value;
+  var val=messageInputEl.value;
   valOld=val;
-  var a=val.substr(0,messagesInputEl.selectionStart);
-  var b=val.substr(messagesInputEl.selectionEnd,val.length-messagesInputEl.selectionEnd);
+  var a=val.substr(0,messageInputEl.selectionStart);
+  var b=val.substr(messageInputEl.selectionEnd,val.length-messageInputEl.selectionEnd);
   if (codeMap['Shift']) txt=txt.replace(/1/g,'!')
                                .replace(/2/g,'@')
                                .replace(/3/g,'#')
@@ -27,45 +27,45 @@ function inputText(txt) {
                                .replace(/8/g,'*')
                                .replace(/9/g,'(')
                                .replace(/0/g,')');
-  messagesInputEl.value=a+txt+b;
-  messagesInputEl.selectionStart=messagesInputEl.selectionEnd=cur=a.length+txt.length;
-  val=messagesInputEl.value;
+  messageInputEl.value=a+txt+b;
+  messageInputEl.selectionStart=messageInputEl.selectionEnd=cur=a.length+txt.length;
+  val=messageInputEl.value;
   if (valOld!=val) valSave=valOld;
 }
 function inputSpecial(ev) {
   if (ev.keyCode==90&&ev.ctrlKey&&ev.type==='keydown') { //Undo last input on Ctrl-Z
     var tmp;
     tmp=val; val=valSave; valSave=tmp;
-    messagesInputEl.value=val;
+    messageInputEl.value=val;
     tmp=cur; cur=curSave; curSave=cur;
-    messagesInputEl.selectionStart=messagesInputEl.selectionEnd=cur;
+    messageInputEl.selectionStart=messageInputEl.selectionEnd=cur;
     return;
   }
   if (ev.type==='mousedown') {
-    curOld=messagesInputEl.selectionEnd;
+    curOld=messageInputEl.selectionEnd;
     debug('dn curOld='+curOld);
     return;
   }
   if (ev.type==='mouseup') { //Cursor leaves where it did not enter
-    cur=(curOld==messagesInputEl.selectionStart?
-      messagesInputEl.selectionEnd :
-      messagesInputEl.selectionStart);
+    cur=(curOld==messageInputEl.selectionStart?
+      messageInputEl.selectionEnd :
+      messageInputEl.selectionStart);
       debug('up curOld='+curOld+' cur='+cur);
     return;
   }
   codeMap[ev.code]=(ev.type==='keydown');
   if (codeMap['Enter']) {
     codeMap['Enter']=false; //Have to set this to false now since the listener will be gone
-    document.getElementById('messages-button').click();
+    document.getElementById('message-button').click();
   }
-  val=messagesInputEl.value;
+  val=messageInputEl.value;
   codeMap['Shift']=ev.shiftKey;
   if (codeMap['Backspace'] || codeMap['Delete']) {
     valOld=val;
-    var a=val.substr(0,messagesInputEl.selectionStart);
-    var b=val.substr(messagesInputEl.selectionEnd,val.length-messagesInputEl.selectionEnd);
-    messagesInputEl.value=val=a+b;
-    messagesInputEl.selectionStart=messagesInputEl.selectionEnd=cur=a.length;
+    var a=val.substr(0,messageInputEl.selectionStart);
+    var b=val.substr(messageInputEl.selectionEnd,val.length-messageInputEl.selectionEnd);
+    messageInputEl.value=val=a+b;
+    messageInputEl.selectionStart=messageInputEl.selectionEnd=cur=a.length;
     if (valOld==val) {
       if (codeMap['Backspace']) {
         b=val.substr(cur,val.length);
@@ -79,35 +79,35 @@ function inputSpecial(ev) {
         cur--;
       }
     }
-    messagesInputEl.value=a+b;
-    messagesInputEl.selectionStart=messagesInputEl.selectionEnd=cur;
-    val=messagesInputEl.value;
+    messageInputEl.value=a+b;
+    messageInputEl.selectionStart=messageInputEl.selectionEnd=cur;
+    val=messageInputEl.value;
     if (valOld!=val) valSave=valOld;
   }
   else if (codeMap['ArrowLeft']) {
     if (codeMap['Shift']) {
-      const left=(messagesInputEl.selectionStart==cur);
+      const left=(messageInputEl.selectionStart==cur);
       if (cur>0) cur--;
-      if (left) messagesInputEl.selectionStart=cur;
-      else messagesInputEl.selectionEnd=cur;
+      if (left) messageInputEl.selectionStart=cur;
+      else messageInputEl.selectionEnd=cur;
     }
     else {
-      cur=messagesInputEl.selectionStart;
+      cur=messageInputEl.selectionStart;
       if (cur>0) cur--;
-      messagesInputEl.selectionStart=messagesInputEl.selectionEnd=cur;
+      messageInputEl.selectionStart=messageInputEl.selectionEnd=cur;
     }
   }
   else if (codeMap['ArrowRight']) {
     if (codeMap['Shift']) {
-      const right=(messagesInputEl.selectionEnd==cur);
+      const right=(messageInputEl.selectionEnd==cur);
       if (cur<val.length) cur++;
-      if (right) messagesInputEl.selectionEnd=cur;
-      else messagesInputEl.selectionStart=cur;
+      if (right) messageInputEl.selectionEnd=cur;
+      else messageInputEl.selectionStart=cur;
     }
     else {
-      cur=messagesInputEl.selectionEnd;
+      cur=messageInputEl.selectionEnd;
       if (cur<val.length) cur++;
-      messagesInputEl.selectionStart=messagesInputEl.selectionEnd=cur;
+      messageInputEl.selectionStart=messageInputEl.selectionEnd=cur;
     }
   }
 }

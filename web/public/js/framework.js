@@ -8,8 +8,8 @@ const spinnerEl = document.getElementById('spinner');
 const canvasEl = document.getElementById('canvas');
 const uiDivEl = document.getElementById('ui-div');
 const outputEl = document.getElementById('output');
-const messagesFormEl = document.getElementById('messages-form');
-const messagesInputEl = document.getElementById('messages-input');
+const messageFormEl = document.getElementById('message-form');
+const messageInputEl = document.getElementById('message-input');
 const messagesEl = document.getElementById('messages');
 var clickEv = 'click'; //Assume mouse until proven touchable
 var outputShowing = false;
@@ -62,12 +62,12 @@ function showOutput() {
     messagesEl.style.display='block'; //Always show messages
     messagesEl.style.top='30px'; //Move below input field
     //Messages input
-    messagesFormEl.style.display='block'; //Show input field and button
-    messagesInputEl.addEventListener('keydown', inputSpecial); //Required for special keys in input field
-    messagesInputEl.addEventListener('keyup', inputSpecial); //Required for special keys in input field
-    messagesInputEl.addEventListener('mousedown', inputSpecial); //Required for special keys in input field
-    messagesInputEl.addEventListener('mouseup', inputSpecial); //Required for special keys in input field
-    messagesInputEl.focus();
+    messageFormEl.style.display='block'; //Show input field and button
+    messageInputEl.addEventListener('keydown', inputSpecial); //Required for special keys in input field
+    messageInputEl.addEventListener('keyup', inputSpecial); //Required for special keys in input field
+    messageInputEl.addEventListener('mousedown', inputSpecial); //Required for special keys in input field
+    messageInputEl.addEventListener('mouseup', inputSpecial); //Required for special keys in input field
+    messageInputEl.focus();
   }
 }
 function hideOutput() {
@@ -80,11 +80,11 @@ function hideOutput() {
   uiDivEl.style.display='none';
   messages.style.top='0';
   //Messages input
-  messagesInputEl.value='';
-  messagesInputEl.removeEventListener('keydown', inputSpecial);
-  messagesInputEl.removeEventListener('keyup', inputSpecial);
-  messagesInputEl.removeEventListener('mousedown', inputSpecial);
-  messagesInputEl.removeEventListener('mouseup', inputSpecial);
+  messageInputEl.value='';
+  messageInputEl.removeEventListener('keydown', inputSpecial);
+  messageInputEl.removeEventListener('keyup', inputSpecial);
+  messageInputEl.removeEventListener('mousedown', inputSpecial);
+  messageInputEl.removeEventListener('mouseup', inputSpecial);
   //Speech
   window.speechSynthesis.cancel();
 }
