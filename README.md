@@ -6,6 +6,8 @@
 
 ### Debug: `./run debug`
 
+### To rebuild all C/C++ object files (not typically needed): `make clean; ./run`
+
 ## api/
 Library written for graphics, audio, input, and special operations using Emscripten C/C++
 
