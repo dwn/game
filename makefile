@@ -19,7 +19,7 @@ SRC_FILES := $(wildcard $(IDIR)/*.cpp)
 OBJ_FILES := $(patsubst $(IDIR)/%.cpp,$(ODIR)/%.o,$(SRC_FILES))
 SRC_FILES2 := $(wildcard $(IDIR2)/*.cpp)
 HTML_FILES := $(patsubst $(IDIR2)/%.cpp,$(ODIR)/%.html,$(SRC_FILES2))
-all: directories $(OBJ_FILES) $(HTML_FILES) clean
+all: directories $(OBJ_FILES) $(HTML_FILES) #clean #Uncomment 'clean' to rebuild all files each time
 debug: all
 ###########################
 # Make directories
