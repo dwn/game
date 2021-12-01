@@ -14,7 +14,7 @@ Library written for graphics, audio, input, and special operations using Emscrip
 ## app/
 Code for games and other classes written in C/C++ using the library
 
-## [app_name]/
+## [app-name]/
 Particular assets and config for an app
 
 ## bin/
