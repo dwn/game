@@ -15,17 +15,17 @@ html(lang='en')
     script(src='/js/xmeffects.js')
     script(src='/js/xm.js')
   body
-    div#page(style='font-family:latin')
+    #page(style='font-family:latin')
       canvas#canvas(oncontextmenu='event.preventDefault()' width=640 height=480)
-      div#spinner
+      #spinner
       ul#messages
-      div#ui-div
+      #ui-div
         form#message-form(action='')
           input#message-input(autocomplete='off' contentEditable='true')
           button#message-button &rarrhk;
-        div#output-div
-          div#status
-          div#output
+        #output-div
+          #status
+          #output
 script(src='version.js')
 script(src='js/framework-input-handler.js')
 script(src='js/framework.js')

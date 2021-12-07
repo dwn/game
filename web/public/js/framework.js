@@ -3,6 +3,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 if (typeof DEBUG!=='undefined' && DEBUG==1) {function debug(s){console.log(s);}} else {function debug(s){}}
 ////////////////////////////////////////////////////////////////////////////////
+myUser = { username:'test', id:'777', email:'test@test.test', imageURL:'https://test/test.jpg' }
+myUser.longId = `g${myUser.id}_${myUser.username}`;
+myUser.lang = 'teonaht';
+////////////////////////////////////////////////////////////////////////////////
 const statusEl = document.getElementById('status');
 const spinnerEl = document.getElementById('spinner');
 const canvasEl = document.getElementById('canvas');

@@ -10,12 +10,21 @@ const CLOUD_BUCKET = cfg['CLOUD_BUCKET'];
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 const bucket = storage.bucket(CLOUD_BUCKET);
+//
+// const firebase = require("firebase");
+// require("firebase/firestore");
+// firebase.initializeApp({
+//   apiKey: '### FIREBASE API KEY ###',
+//   authDomain: '### FIREBASE AUTH DOMAIN ###',
+//   projectId: cfg['PROJECT_ID']
+// });
+// var db = firebase.firestore();
+//
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
-const ulid = require('ulid');
 const request = require('request');
+const io = require('socket.io')(server);
 ////////////////////////////////////////////
 // Setup
 ////////////////////////////////////////////
@@ -56,65 +65,40 @@ io.on('connection', (socket) => {
   });
 });
 ////////////////////////////////////////////
-const arrUser = [
-'adair','aiden','addison','adrian','leslie','ainsley','alby','alex',
-'andy','sam','ash','elm','juniper','aspen','bailey','billie',
-'dana','kelly','cody','jamie','morgan','nikki','skylar','shiloh',
-'terry','kerry','story','sutton','leigh','lake','amari','charlie',
-'bellamy','charlie','dakota','denver','emerson','finley','justice','river',
-'skyler','tatum','avery','briar','brooklyn','campbell','dallas','gray',
-'sage','haven','indigo','jordan','lennox','morgan','onyx','peyton',
-'quinn','reese','riley','robin','rory','sawyer','shae','shiloh'];
-function romanNumeral(number){
-  var a, roman = ''; const romanNumList = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XV:40,X:10,IX:9,V:5,IV:4,I:1};
-  if (number<1 || number>3999) return 'Enter a number between 1 and 3999';
-  else for(let key in romanNumList) { a = Math.floor(number / romanNumList[key]); if(a >= 0) for(let i = 0; i < a; i++) roman += key; number = number % romanNumList[key]; }
-  return roman;
-}
-function uniqueUsername(name=null) {
-  var un = (name? name : arrUser[Math.floor(Math.random()*arrUser.length)]);
-  var n = 1;
-  if (dicFontBasename) {
-    for(var user in dicFontBasename) {
-      var un2=user.split('_')[1].split('-')[0];
-      if (un===un2) n++;
+app.get('/lang-file-url/:langFilename', (req, res) => { //Can be basename or full name of file
+  let langFilename = req.params.langFilename;
+  if (langFilename.match(/\d{4}[-]\d{2}[-]\d{2}[_]\d{2}[_]\d{2}[_]\d{2}[_]\d{3}[_]/)) {
+    res.send(`https://storage.googleapis.com/${CLOUD_BUCKET}/${langFilename}`);
+  } else {
+    res.send(`https://dwn.github.io/common/lang/${langFilename}`);
+  }
+});
+////////////////////////////////////////////
+app.get('/writing-mode/:langFilename', (req, res) => { //Can be basename or full name of file
+  request.get(`/lang-file-url/${req.params.langFilename}`, function (error, response, body) {
+    if (!error && response.statusCode === 200) {
+      let langFileURL;
+      langFileURL = body;
+      if (!langFileURL.includes('.svg')) langFileURL+='.svg';
+      let json;
+      request.get(langFileURL, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+          json = JSON.parse(body.split(/<desc>|\/desc>/g)[1]);
+          let d = json['direction'];
+          res.send(d==='right-down'? 'horizontal-tb' :
+                   d==='down-right'? 'vertical-lr': 'vertical-rl');
+        }
+      });
     }
-  }
-  un += (n>1? '-' + romanNumeral(n) : '');
-  return 'x' + ulid.ulid() + '_' + un; //Starts with a letter because sometimes uid gets interpretted as a number otherwise
-}
-var myUniqueUsername;
-app.get('/unique-username', function(req, res) {
-  res.send(uniqueUsername(req.query.name));
-});
-app.get('/my-unique-username', function(req, res) {
-  myUniqueUsername = (myUniqueUsername? myUniqueUsername : uniqueUsername(req.query.name));
-  res.send(myUniqueUsername);
+  });
 });
 ////////////////////////////////////////////
-function connectChat(username,fontBasename,isMe=false) {
-  if (!username) username = myUniqueUsername = uniqueUsername();
-  io.emit('chat message', '_connected:'+username+':'+fontBasename);
-  dicFontBasename[username] = fontBasename;
-}
-app.get('/chat', (req, res) => {
-  res.render('chat-login.pug');
-});
-app.get('/chat/:fontBasename', (req, res) => {
-  var username=req.query.username;
-  if (!(username&&username.includes('_'))) {
-    username=uniqueUsername(username);
-    res.redirect('/chat/'+req.params.fontBasename+'?username='+username);
-  }
-  connectChat(username,req.params.fontBasename,true);
-  res.render('chat.pug', { arrLang:arrLang, username:username });
-});
-////////////////////////////////////////////
-app.get('/bucket-url', (req, res) => {
-  res.send(`https://storage.googleapis.com/${CLOUD_BUCKET}/`);
-});
-app.get('/common-lang-url', (req, res) => {
-  res.send(`https://dwn.github.io/common/lang/`);
+app.get('/chat/longId/:longId/lang/:lang', (req, res) => {
+  let longId = req.params.longId;
+  let lang = req.params.lang;
+  io.emit('chat message', '_connected:'+longId+':'+lang);
+  dicFontBasename[longId] = lang;
+  res.sendStatus(200);
 });
 ////////////////////////////////////////////
 // Main
@@ -124,14 +108,6 @@ app.get('/', (req, res) => {
 });
 ////////////////////////////////////////////
 app.get('/:appFileBasename', (req, res) => {
-  var fontBasename = req.query.font;
-  var username=req.query.username;
-  if (!(fontBasename&&username&&username.includes('_'))) {
-    if (!(username&&username.includes('_'))) username=uniqueUsername(username);
-    if (!fontBasename) fontBasename = 'teonaht'; //Default font
-    res.redirect('/'+req.params.appFileBasename+'?font='+fontBasename+'&username='+username);
-  }
-  connectChat(username,fontBasename,true);
   res.render('framework.pug', { appFileBasename : req.params.appFileBasename });
 });
 ////////////////////////////////////////////
